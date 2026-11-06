@@ -1,8 +1,8 @@
 # jeecgboot-tiplus 漏洞检测 by dollmarker v1.0
 
-JeecgBoot / JimuReport 漏洞检测工具，33 项 POC。二级接口不自动补。不同站点前缀不同（jeecg-boot / api / prod-api / 根），写死会造成误判，这点在很多工具上都是写死的
+JeecgBoot / JimuReport 漏洞检测工具，33 项 POC。二级接口不自动补。不同站点前缀不同（jeecg-boot / api / prod-api / 根），写死会造成误判
 
-工具参考的 POC 见 poc.txt。这里poc是参考网上查询的，该工具只能粗略的扫一遍，实际渗透中因目标环境不同存在漏洞而打不出，这里自行变体测试。
+工具参考的 POC 见 poc.txt。这里poc是参考网上普遍适用于大部分场景的，该工具只能粗略的扫一遍，实际渗透中若因目标环境不同存在漏洞而打不出，这里请自行变体测试。
 
 注意：勾选完整回显会显示打的完整payload，便于自检
 
