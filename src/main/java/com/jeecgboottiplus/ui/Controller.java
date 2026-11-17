@@ -1,10 +1,10 @@
-package com.jeescan.ui;
+package com.jeecgboottiplus.ui;
 
-import com.jeescan.Cli;
-import com.jeescan.core.Detector;
-import com.jeescan.core.Engine;
-import com.jeescan.core.Http;
-import com.jeescan.core.Result;
+import com.jeecgboottiplus.Cli;
+import com.jeecgboottiplus.core.Detector;
+import com.jeecgboottiplus.core.Engine;
+import com.jeecgboottiplus.core.Http;
+import com.jeecgboottiplus.core.Result;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -193,7 +193,7 @@ public class Controller {
                 v.stopBtn().setDisable(true);
             }
         };
-        Thread t = new Thread(task, "jeescan-worker");
+        Thread t = new Thread(task, "jeecgboottiplus-worker");
         t.setDaemon(true);
         t.start();
     }
@@ -223,7 +223,7 @@ public class Controller {
             @Override protected void failed()   { v.cmdOut().setText("[!] " + getException()); }
             @Override protected void done()      { v.cmdSendBtnDisable(false); }
         };
-        Thread t = new Thread(task, "jeescan-cmd");
+        Thread t = new Thread(task, "jeecgboottiplus-cmd");
         t.setDaemon(true);
         t.start();
     }
@@ -418,7 +418,7 @@ public class Controller {
                 return null;
             }
         };
-        Thread t = new Thread(task, "jeescan-batch");
+        Thread t = new Thread(task, "jeecgboottiplus-batch");
         t.setDaemon(true);
         t.start();
     }
@@ -517,7 +517,7 @@ public class Controller {
             @Override protected void failed()    { v.jdbcOut().setText("[!] " + getException()); }
             @Override protected void done()      { v.jdbcExecEnable(true); }
         };
-        Thread t = new Thread(task, "jeescan-jdbc");
+        Thread t = new Thread(task, "jeecgboottiplus-jdbc");
         t.setDaemon(true);
         t.start();
     }

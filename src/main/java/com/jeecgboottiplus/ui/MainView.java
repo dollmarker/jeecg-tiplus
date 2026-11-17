@@ -1,4 +1,4 @@
-package com.jeescan.ui;
+package com.jeecgboottiplus.ui;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -553,7 +553,7 @@ public class MainView {
         });
 
         // 填充 26 项
-        for (com.jeescan.core.Detector d : com.jeescan.core.Registry.all()) {
+        for (com.jeecgboottiplus.core.Detector d : com.jeecgboottiplus.core.Registry.all()) {
             rows.add(new Row(d));
         }
     }
@@ -586,7 +586,7 @@ public class MainView {
         batchRun.setOnAction(e -> runBatch());
         proxyTestBtn.setOnAction(e -> new Controller(this).testProxy());
 
-        log("jeecgboot-tiplus 漏洞检测 by dollmarker v1.0");
+        log("jeecgboot-tiplus 漏洞检测 by dollmarker v1.1");
         log("已就绪。");
         log("接口需手动填（jeecg-boot / api / prod-api / 留空），工具不自动补前缀。");
         log("有 WAF 时把「间隔」设为 6 秒，否则连续请求会被封 IP。");
@@ -611,13 +611,13 @@ public class MainView {
         final String severity;
         final String endpoint;
         final boolean needsAuth;
-        final com.jeescan.core.Detector detector;
+        final com.jeecgboottiplus.core.Detector detector;
 
         final BooleanProperty checked = new SimpleBooleanProperty(true);
         final StringProperty resultText = new SimpleStringProperty("");
-        com.jeescan.core.Result result;
+        com.jeecgboottiplus.core.Result result;
 
-        Row(com.jeescan.core.Detector d) {
+        Row(com.jeecgboottiplus.core.Detector d) {
             this.detector = d;
             this.id = d.getId();
             this.name = d.getName();
@@ -628,7 +628,7 @@ public class MainView {
     }
 
     // 占位：实际扫描/命令/上传/批量逻辑放在 Controller 里，避免本类过长
-    private com.jeescan.core.Engine engine;
+    private com.jeecgboottiplus.core.Engine engine;
 
     void log(String s) {
         logArea.appendText(s + "\n");
@@ -709,7 +709,7 @@ public class MainView {
     public Button scanBtn()            { return scanBtn; }
     public Button stopBtn()            { return stopBtn; }
     public void cmdSendBtnDisable(boolean b) { cmdSendBtn.setDisable(b); }
-    public void setEngine(com.jeescan.core.Engine e) { this.engine = e; }
+    public void setEngine(com.jeecgboottiplus.core.Engine e) { this.engine = e; }
 
     static int toInt(String s, int def) {
         try { return Integer.parseInt(s.trim()); }

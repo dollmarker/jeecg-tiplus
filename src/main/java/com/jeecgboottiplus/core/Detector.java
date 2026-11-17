@@ -1,4 +1,4 @@
-package com.jeescan.core;
+package com.jeecgboottiplus.core;
 
 import java.security.SecureRandom;
 import java.util.Map;

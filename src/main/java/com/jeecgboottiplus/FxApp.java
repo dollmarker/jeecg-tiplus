@@ -1,6 +1,6 @@
-package com.jeescan;
+package com.jeecgboottiplus;
 
-import com.jeescan.ui.MainView;
+import com.jeecgboottiplus.ui.MainView;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -15,7 +15,7 @@ public class FxApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        stage.setTitle("jeecgboot-tiplus 漏洞检测 by dollmarker v1.0");
+        stage.setTitle("jeecgboot-tiplus 漏洞检测 by dollmarker v1.1");
 
         MainView view = new MainView(stage);
         stage.setScene(view.build());

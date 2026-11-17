@@ -1,4 +1,10 @@
-# jeecgboot-tiplus 漏洞检测 by dollmarker v1.0
+# jeecgboot-tiplus 漏洞检测 by dollmarker v1.1
+
+#### 2026-11-17
+
+新增poc 1项：getDataSourceByPage漏洞敏感信息泄露导致数据库明文账密泄露，方式：GET /jmreport/getDataSourceByPage
+
+
 
 JeecgBoot / JimuReport 漏洞检测工具，33 项 POC。二级接口不自动补。不同站点前缀不同（jeecg-boot / api / prod-api / 根），写死会造成误判
 
@@ -167,7 +173,7 @@ pgsql 示例：
 
 ## 十、源码结构
 
-    src/main/java/com/jeescan/
+    src/main/java/com/jeecgboottiplus/
     ├── Launcher.java        入口（GUI / CLI 分发）
     ├── FxApp.java           JavaFX 应用
     ├── Cli.java             命令行

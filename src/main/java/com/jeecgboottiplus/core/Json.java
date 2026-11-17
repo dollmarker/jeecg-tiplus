@@ -1,4 +1,4 @@
-package com.jeescan.core;
+package com.jeecgboottiplus.core;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

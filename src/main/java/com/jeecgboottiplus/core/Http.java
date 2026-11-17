@@ -1,4 +1,4 @@
-package com.jeescan.core;
+package com.jeecgboottiplus.core;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;

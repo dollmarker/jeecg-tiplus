@@ -1,11 +1,11 @@
-package com.jeescan.core;
+package com.jeecgboottiplus.core;
 
-import com.jeescan.checks.InfoLeak;
-import com.jeescan.checks.JdbcTestConnection;
-import com.jeescan.checks.Others;
-import com.jeescan.checks.SqliErrorBased;
-import com.jeescan.checks.SstiOthers;
-import com.jeescan.checks.SstiQueryFieldBySql;
+import com.jeecgboottiplus.checks.InfoLeak;
+import com.jeecgboottiplus.checks.JdbcTestConnection;
+import com.jeecgboottiplus.checks.Others;
+import com.jeecgboottiplus.checks.SqliErrorBased;
+import com.jeecgboottiplus.checks.SstiOthers;
+import com.jeecgboottiplus.checks.SstiQueryFieldBySql;
 
 import java.util.ArrayList;
 import java.util.List;

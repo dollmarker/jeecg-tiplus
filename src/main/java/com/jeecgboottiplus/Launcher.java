@@ -1,4 +1,4 @@
-package com.jeescan;
+package com.jeecgboottiplus;
 
 /**
  * 通用启动入口（不继承 Application）。

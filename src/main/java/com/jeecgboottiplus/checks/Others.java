@@ -1,9 +1,9 @@
-package com.jeescan.checks;
+package com.jeecgboottiplus.checks;
 
-import com.jeescan.core.Detector;
-import com.jeescan.core.Http;
-import com.jeescan.core.Json;
-import com.jeescan.core.Result;
+import com.jeecgboottiplus.core.Detector;
+import com.jeecgboottiplus.core.Http;
+import com.jeecgboottiplus.core.Json;
+import com.jeecgboottiplus.core.Result;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -692,7 +692,7 @@ public final class Others {
             super("8", "show SQLi", "POST /jmreport/show", "updatexml", "high", false,
                     "id 参数注入；随机标记 + 反例 + 二次确认",
                     "POST", "jmreport/show",
-                    com.jeescan.checks.SqliErrorBased.Kind.PARAMS_JSON, "mysql");
+                    com.jeecgboottiplus.checks.SqliErrorBased.Kind.PARAMS_JSON, "mysql");
         }
     }
 
@@ -702,7 +702,7 @@ public final class Others {
                     "fieldName 注入", "high", false,
                     "fieldName 可注入表达式；用报错回显 + 反例判定",
                     "POST", "drag/onlDragDatasetHead/getTotalData",
-                    com.jeescan.checks.SqliErrorBased.Kind.SQL_PARAM, "mysql");
+                    com.jeecgboottiplus.checks.SqliErrorBased.Kind.SQL_PARAM, "mysql");
         }
 
         @Override

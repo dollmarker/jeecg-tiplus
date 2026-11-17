@@ -1,9 +1,9 @@
-package com.jeescan.checks;
+package com.jeecgboottiplus.checks;
 
-import com.jeescan.core.Detector;
-import com.jeescan.core.Http;
-import com.jeescan.core.Json;
-import com.jeescan.core.Result;
+import com.jeecgboottiplus.core.Detector;
+import com.jeecgboottiplus.core.Http;
+import com.jeecgboottiplus.core.Json;
+import com.jeecgboottiplus.core.Result;
 
 /**
  * SQL 报错注入通用检测器（覆盖 #5 #6 #8 #9 #10）。

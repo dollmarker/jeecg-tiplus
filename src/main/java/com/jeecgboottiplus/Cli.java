@@ -1,10 +1,10 @@
-package com.jeescan;
+package com.jeecgboottiplus;
 
-import com.jeescan.core.Detector;
-import com.jeescan.core.Engine;
-import com.jeescan.core.Http;
-import com.jeescan.core.Registry;
-import com.jeescan.core.Result;
+import com.jeecgboottiplus.core.Detector;
+import com.jeecgboottiplus.core.Engine;
+import com.jeecgboottiplus.core.Http;
+import com.jeecgboottiplus.core.Registry;
+import com.jeecgboottiplus.core.Result;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public final class Cli {
         }
 
         if (url == null || url.isEmpty()) {
-            System.out.println("jeecgboot-tiplus 漏洞检测 by dollmarker v1.0");
+            System.out.println("jeecgboot-tiplus 漏洞检测 by dollmarker v1.1");
             System.out.println();
             System.out.println("用法: java -jar jeecgboot-tiplus.jar --cli <url> [选项]");
             System.out.println("  --prefix <p>     二级接口，如 jeecg-boot 或 api；默认空");
@@ -134,7 +134,7 @@ public final class Cli {
             list = f;
         }
 
-        System.out.println("jeecgboot-tiplus 漏洞检测 by dollmarker v1.0");
+        System.out.println("jeecgboot-tiplus 漏洞检测 by dollmarker v1.1");
         System.out.println("目标 : " + url);
         System.out.println("接口 : " + (prefix.isEmpty() ? "(根)" : prefix)
                 + "    检测项 : " + list.size());
